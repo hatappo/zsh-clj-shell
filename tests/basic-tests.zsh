@@ -128,3 +128,30 @@ if grep -q 'zsh-clj-shell-unload' "$plugin_file"; then
 else
   assert_equals "true" "false" "zsh-clj-shell-unload is defined"
 fi
+
+echo ""
+echo "--- Pipeline transform tests ---"
+
+# Test: pipeline line with a Clojure stage is transformed
+result=$(zsh -ic "source '${PROJECT_DIR}/zsh-clj-shell.plugin.zsh'; zsh-clj-shell-transform-line '(+ 1 2) | cat'; print -r -- \"\$?::\$REPLY\"")
+assert_match '^0::bb -e .* \| cat$' "$result" "Clojure stage in a pipeline is transformed"
+
+# Test: pure shell pipeline is not transformed
+result=$(zsh -ic "source '${PROJECT_DIR}/zsh-clj-shell.plugin.zsh'; zsh-clj-shell-transform-line 'echo hi | cat'; print -r -- \"\$?::\$REPLY\"")
+assert_match '^1::' "$result" "Pure shell pipeline is not transformed"
+
+# Test: || line falls back to zsh behavior
+result=$(zsh -ic "source '${PROJECT_DIR}/zsh-clj-shell.plugin.zsh'; zsh-clj-shell-transform-line '(+ 1 2) || echo ng'; print -r -- \"\$?::\$REPLY\"")
+assert_match '^1::' "$result" "Boolean OR line is not transformed"
+
+# Test: string output from a Clojure stage is emitted without extra quotes
+result=$(zsh -fc "source '${PROJECT_DIR}/zsh-clj-shell.plugin.zsh'; zsh-clj-shell-transform-line \"printf '  hello  ' | (clojure.string/trim %) | (clojure.string/upper-case %)\"; eval -- \"\$REPLY\"")
+assert_equals "HELLO" "$result" "String pipeline output stays plain text"
+
+# Test: non-string output still uses pr-str
+result=$(zsh -fc "source '${PROJECT_DIR}/zsh-clj-shell.plugin.zsh'; zsh-clj-shell-transform-line \"printf 'hello' | (count %)\"; eval -- \"\$REPLY\"")
+assert_equals "5" "$result" "Non-string output is emitted as pr-str text"
+
+# Test: clojure.string functions are available without namespace qualification
+result=$(zsh -fc "source '${PROJECT_DIR}/zsh-clj-shell.plugin.zsh'; zsh-clj-shell-transform-line \"printf '  hello  ' | (trim %) | (upper-case %)\"; eval -- \"\$REPLY\"")
+assert_equals "HELLO" "$result" "clojure.string functions can be used without namespace"

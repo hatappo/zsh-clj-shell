@@ -24,17 +24,24 @@ mkdir -p "$INSTALL_DIR"
 cp "$SCRIPT_DIR/$PLUGIN_FILE" "$INSTALL_DIR/"
 echo "Copied plugin to ${INSTALL_DIR}/"
 
-# Add config to .zshrc if needed
-if [[ -f "$ZSHRC" ]] && grep -q 'source.*zsh-clj-shell\.plugin\.zsh' "$ZSHRC"; then
-  echo "zsh-clj-shell config already exists in .zshrc (skipped)"
-else
-  {
-    echo ""
-    echo "# zsh-clj-shell - Clojure (Babashka) shell integration"
-    echo "source ${INSTALL_DIR}/${PLUGIN_FILE}"
-  } >> "$ZSHRC"
-  echo "Added config to .zshrc"
+# Ensure zsh-clj-shell source line exists at the end of .zshrc
+if [[ ! -f "$ZSHRC" ]]; then
+  touch "$ZSHRC"
 fi
+
+tmp_zshrc="$(mktemp)"
+awk '
+  $0 !~ /source.*zsh-clj-shell\.plugin\.zsh/
+' "$ZSHRC" > "$tmp_zshrc"
+mv "$tmp_zshrc" "$ZSHRC"
+
+{
+  echo ""
+  echo "# zsh-clj-shell - Clojure (Babashka) shell integration"
+  echo "source ${INSTALL_DIR}/${PLUGIN_FILE}"
+} >> "$ZSHRC"
+
+echo "Updated .zshrc (source line moved to the end)"
 
 echo ""
 echo "zsh-clj-shell installation complete!"
