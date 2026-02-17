@@ -78,24 +78,6 @@ $ printf '  aaa  \n  bbb  ' | (map (comp upper-case trim) %) | cat -n
 
 ## Installation
 
-### Automatic Installation
-
-```bash
-git clone https://github.com/hatappo/zsh-clj-shell.git
-cd zsh-clj-shell
-./install.sh
-```
-
-### Manual Installation
-
-Add the following to `~/.zshrc`:
-
-```zsh
-source /path/to/zsh-clj-shell/zsh-clj-shell.plugin.zsh
-```
-
-Place this near the end of `~/.zshrc` so later plugins do not replace `accept-line`.
-
 ### Plugin Managers
 
 #### zinit
@@ -139,6 +121,24 @@ Then add `zsh-clj-shell` to your plugins in `~/.zshrc`:
 ```zsh
 plugins=(... zsh-clj-shell)
 ```
+
+### Automatic Installation
+
+```bash
+git clone https://github.com/hatappo/zsh-clj-shell.git
+cd zsh-clj-shell
+./install.sh
+```
+
+### Manual Installation
+
+Add the following to `~/.zshrc`:
+
+```zsh
+source /path/to/zsh-clj-shell/zsh-clj-shell.plugin.zsh
+```
+
+Place this near the end of `~/.zshrc` so later plugins do not replace `accept-line`.
 
 ## Unload
 
