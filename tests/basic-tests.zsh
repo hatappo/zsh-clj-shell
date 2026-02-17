@@ -144,14 +144,45 @@ assert_match '^1::' "$result" "Pure shell pipeline is not transformed"
 result=$(zsh -ic "source '${PROJECT_DIR}/zsh-clj-shell.plugin.zsh'; zsh-clj-shell-transform-line '(+ 1 2) || echo ng'; print -r -- \"\$?::\$REPLY\"")
 assert_match '^1::' "$result" "Boolean OR line is not transformed"
 
-# Test: string output from a Clojure stage is emitted without extra quotes
-result=$(zsh -fc "source '${PROJECT_DIR}/zsh-clj-shell.plugin.zsh'; zsh-clj-shell-transform-line \"printf '  hello  ' | (clojure.string/trim %) | (clojure.string/upper-case %)\"; eval -- \"\$REPLY\"")
+# Test: string output from a Clojure stage is emitted without extra quotes (using map for sequence)
+result=$(zsh -fc "source '${PROJECT_DIR}/zsh-clj-shell.plugin.zsh'; zsh-clj-shell-transform-line \"printf '  hello  ' | (map clojure.string/trim %) | (map clojure.string/upper-case %)\"; eval -- \"\$REPLY\"")
 assert_equals "HELLO" "$result" "String pipeline output stays plain text"
 
-# Test: non-string output still uses pr-str
+# Test: count now returns element count (sequence length), not string length
 result=$(zsh -fc "source '${PROJECT_DIR}/zsh-clj-shell.plugin.zsh'; zsh-clj-shell-transform-line \"printf 'hello' | (count %)\"; eval -- \"\$REPLY\"")
-assert_equals "5" "$result" "Non-string output is emitted as pr-str text"
+assert_equals "1" "$result" "Single line input becomes 1-element vector"
 
-# Test: clojure.string functions are available without namespace qualification
-result=$(zsh -fc "source '${PROJECT_DIR}/zsh-clj-shell.plugin.zsh'; zsh-clj-shell-transform-line \"printf '  hello  ' | (trim %) | (upper-case %)\"; eval -- \"\$REPLY\"")
+# Test: clojure.string functions are available without namespace qualification (using map)
+result=$(zsh -fc "source '${PROJECT_DIR}/zsh-clj-shell.plugin.zsh'; zsh-clj-shell-transform-line \"printf '  hello  ' | (map trim %) | (map upper-case %)\"; eval -- \"\$REPLY\"")
 assert_equals "HELLO" "$result" "clojure.string functions can be used without namespace"
+
+echo ""
+echo "--- Sequence input/output tests ---"
+
+# Test: multiline input becomes a vector
+result=$(zsh -fc "source '${PROJECT_DIR}/zsh-clj-shell.plugin.zsh'; zsh-clj-shell-transform-line \"printf 'a\nb\nc' | (count %)\"; eval -- \"\$REPLY\"")
+assert_equals "3" "$result" "Multiline input becomes a 3-element vector"
+
+# Test: map over lines
+result=$(zsh -fc "source '${PROJECT_DIR}/zsh-clj-shell.plugin.zsh'; zsh-clj-shell-transform-line \"printf 'a\nb' | (map upper-case %)\"; eval -- \"\$REPLY\"")
+assert_equals $'A\nB' "$result" "map upper-case over lines"
+
+# Test: %% provides raw string
+result=$(zsh -fc "source '${PROJECT_DIR}/zsh-clj-shell.plugin.zsh'; zsh-clj-shell-transform-line \"printf 'a\nb' | (count %%)\"; eval -- \"\$REPLY\"")
+assert_equals "3" "$result" "%% provides raw string (length of 'a\\nb' is 3)"
+
+# Test: empty input becomes empty vector
+result=$(zsh -fc "source '${PROJECT_DIR}/zsh-clj-shell.plugin.zsh'; zsh-clj-shell-transform-line \"printf '' | (count %)\"; eval -- \"\$REPLY\"")
+assert_equals "0" "$result" "Empty input becomes empty vector"
+
+# Test: chained map pipeline
+result=$(zsh -fc "source '${PROJECT_DIR}/zsh-clj-shell.plugin.zsh'; zsh-clj-shell-transform-line \"printf '  a  \n  b  ' | (map trim %) | (map upper-case %)\"; eval -- \"\$REPLY\"")
+assert_equals $'A\nB' "$result" "Chained map operations"
+
+# Test: filter operation
+result=$(zsh -fc "source '${PROJECT_DIR}/zsh-clj-shell.plugin.zsh'; zsh-clj-shell-transform-line \"printf 'a\nbb\nccc' | (filter #(> (count %) 1) %)\"; eval -- \"\$REPLY\"")
+assert_equals $'bb\nccc' "$result" "filter operation on lines"
+
+# Test: reverse operation (use clojure.core/reverse explicitly to avoid conflict with clojure.string/reverse)
+result=$(zsh -fc "source '${PROJECT_DIR}/zsh-clj-shell.plugin.zsh'; zsh-clj-shell-transform-line \"printf 'a\nb\nc' | (clojure.core/reverse %)\"; eval -- \"\$REPLY\"")
+assert_equals $'c\nb\na' "$result" "reverse operation on lines"

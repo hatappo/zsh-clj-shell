@@ -50,7 +50,22 @@ zsh-clj-shell-build-bb-stage() {
     input_form='(slurp *in*)'
   fi
 
-  script="(do (require '[clojure.string :as str :refer :all]) (let [input ${input_form} % input result ${expr}] (if (string? result) (println result) (println (pr-str result)))))"
+  script="(do
+  (require '[clojure.string :as str :refer :all])
+  (let [raw ${input_form}
+        %% raw
+        % (if (empty? raw) [] (str/split-lines raw))
+        result ${expr}]
+    (cond
+      (string? result)
+        (println result)
+      (sequential? result)
+        (doseq [x result]
+          (if (string? x)
+            (println x)
+            (println (pr-str x))))
+      :else
+        (println (pr-str result)))))"
   print -r -- "bb -e ${(q)script}"
 }
 

@@ -7,6 +7,8 @@ All other lines run as normal zsh commands.
 
 ## Examples
 
+### Basic Clojure Expressions
+
 ```clojure
 $ (+ 1 2 3)
 6
@@ -16,16 +18,57 @@ $ (str "hello" " " "world")
 
 $ (-> 5 (+ 3) (* 2))
 16
+```
 
+### Pipeline with Sequences (`%`)
+
+Input lines are split into a vector. Use `map`, `filter`, etc. to process each line.
+
+```clojure
+$ printf 'hello\nworld' | (map upper-case %)
+HELLO
+WORLD
+
+$ printf '  a  \n  b  ' | (map (comp upper-case trim) %)
+A
+B
+
+$ printf 'apple\nbanana\ncherry' | (filter #(> (count %) 5) %)
+banana
+cherry
+
+$ printf 'a\nb\nc' | (count %)
+3
+```
+
+### Pipeline with Raw String (`%%`)
+
+Use `%%` when you need the entire input as a single string.
+
+```clojure
+$ printf 'hello world' | (upper-case %%)
+HELLO WORLD
+
+$ printf 'a\nb\nc' | (count %%)
+5
+
+$ printf 'hello\nworld' | (replace %% "\n" ", ")
+hello, world
+```
+
+### Mixed with Shell Commands
+
+```clojure
 $ ls -la
 drwxr-xr-x  5 user  staff  160 Feb 16 19:00 .
 ...
 
-$ printf '  hello  ' | (clojure.string/trim %)
-"hello"
-
 $ (+ 10 20) | cat
 30
+
+$ printf '  aaa  \n  bbb  ' | (map (comp upper-case trim) %) | cat -n
+     1	AAA
+     2	BBB
 ```
 
 ## Requirements
@@ -69,10 +112,25 @@ The plugin overrides the ZLE `accept-line` widget and checks the input when Ente
 2. Otherwise: execute as a normal zsh command
 
 For pipelines with `|`, each stage that starts with `( ... )` is treated as a Clojure stage.
-- Pipeline input is passed as a string to `%`
-- String results are printed as plain text with a trailing newline
-- Non-string results are printed via `pr-str` with a trailing newline
-- `clojure.string` is auto-loaded (`trim`, `upper-case`, etc. can be used without namespace)
+
+### Pipeline Input
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `%` | Input lines as a vector | `"a\nb"` → `["a" "b"]` |
+| `%%` | Raw input as a single string | `"a\nb"` → `"a\nb"` |
+
+### Pipeline Output
+
+| Result Type | Output Format |
+|-------------|---------------|
+| Sequential (vector, list) | Each element on a new line |
+| String | Plain text |
+| Other | `pr-str` representation |
+
+### Auto-loaded Libraries
+
+`clojure.string` is auto-loaded with `:refer :all`, so functions like `trim`, `upper-case`, `replace`, etc. can be used without namespace prefix.
 
 Babashka startup is typically around ~20ms, so interactive lag is minimal.
 
