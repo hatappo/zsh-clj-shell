@@ -1,6 +1,6 @@
 # zsh-clj-shell
 
-Clojure (Babashka) shell integration for Zsh, inspired by [Rash](https://docs.racket-lang.org/rash/).
+Clojure (Babashka) shell integration for Zsh, inspired by [Rash](https://docs.racket-lang.org/rash/) and [Closh](https://github.com/dundalek/closh).
 
 Lines that start with `(` are evaluated as Clojure expressions by [Babashka](https://github.com/babashka/babashka).  
 All other lines run as normal zsh commands.
@@ -81,7 +81,7 @@ $ printf '  aaa  \n  bbb  ' | (map (comp upper-case trim) %) | cat -n
 ### Automatic Installation
 
 ```bash
-git clone https://github.com/fumihikohata/zsh-clj-shell.git
+git clone https://github.com/hatappo/zsh-clj-shell.git
 cd zsh-clj-shell
 ./install.sh
 ```
@@ -95,6 +95,50 @@ source /path/to/zsh-clj-shell/zsh-clj-shell.plugin.zsh
 ```
 
 Place this near the end of `~/.zshrc` so later plugins do not replace `accept-line`.
+
+### Plugin Managers
+
+#### zinit
+
+```zsh
+zinit light hatappo/zsh-clj-shell
+```
+
+#### zplug
+
+```zsh
+zplug "hatappo/zsh-clj-shell"
+```
+
+#### antigen
+
+```zsh
+antigen bundle hatappo/zsh-clj-shell
+```
+
+#### sheldon
+
+Add to `~/.config/sheldon/plugins.toml`:
+
+```toml
+[plugins.zsh-clj-shell]
+github = "hatappo/zsh-clj-shell"
+```
+
+#### oh-my-zsh
+
+Clone the repository to oh-my-zsh custom plugins directory:
+
+```bash
+git clone https://github.com/hatappo/zsh-clj-shell.git \
+  ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-clj-shell
+```
+
+Then add `zsh-clj-shell` to your plugins in `~/.zshrc`:
+
+```zsh
+plugins=(... zsh-clj-shell)
+```
 
 ## Unload
 
