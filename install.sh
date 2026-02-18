@@ -33,7 +33,8 @@ fi
 
 tmp_zshrc="$(mktemp)"
 awk '
-  $0 !~ /source.*zsh-clj-shell\.plugin\.zsh/
+  $0 !~ /source.*zsh-clj-shell\.plugin\.zsh/ &&
+  $0 !~ /^# zsh-clj-shell/
 ' "$ZSHRC" > "$tmp_zshrc"
 mv "$tmp_zshrc" "$ZSHRC"
 
