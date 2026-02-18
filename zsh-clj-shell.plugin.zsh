@@ -229,23 +229,46 @@ zsh-clj-shell-unload() {
     zle -A .accept-line accept-line
   fi
   zle -D zsh-clj-shell-accept-line
+
+  # Restore original Tab binding
+  if [[ -n "${_zsh_clj_shell_orig_tab_binding-}" ]]; then
+    eval "bindkey ${_zsh_clj_shell_orig_tab_binding#bindkey }"
+  else
+    bindkey '^I' expand-or-complete
+  fi
+  zle -D zsh-clj-shell-tab
+  zle -D zsh-clj-shell-complete
+
+  # Clear completion state
+  unset _zsh_clj_shell_completions_loaded
+  unset _zsh_clj_shell_orig_tab_binding
+  unset clj_completions
+
   echo "zsh-clj-shell: unloaded"
 }
 
 # Completion for Clojure functions
-# Load completions from docs/completions.zsh
+# Load completions once per session
+typeset -g _zsh_clj_shell_completions_loaded
+
 _zsh_clj_shell_complete() {
-  source "${ZSH_CLJ_SHELL_DIR}/completions.zsh"
+  if [[ -z ${_zsh_clj_shell_completions_loaded-} ]]; then
+    source "${ZSH_CLJ_SHELL_DIR}/completions.zsh"
+    _zsh_clj_shell_completions_loaded=1
+  fi
   compadd -Q -a clj_completions
 }
 
 # Register completion widget
 zle -C zsh-clj-shell-complete complete-word _zsh_clj_shell_complete
 
+# Save original Tab binding for restoration on unload
+typeset -g _zsh_clj_shell_orig_tab_binding
+_zsh_clj_shell_orig_tab_binding="$(bindkey '^I')"
+
 # Bind Tab to use our completion when inside parentheses
 zsh-clj-shell-tab() {
-  if [[ "$LBUFFER" == *"("* && "$RBUFFER" != *")"* ]] || \
-     [[ "$LBUFFER" =~ '\([^)]*$' ]]; then
+  if [[ "$LBUFFER" =~ '\([^)]*$' ]]; then
     zle zsh-clj-shell-complete
   else
     zle expand-or-complete

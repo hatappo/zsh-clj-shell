@@ -130,9 +130,9 @@
 
 (defn -main []
   (let [completions (generate-completions)]
-    (println "  local -a clj_completions=(")
+    (println "typeset -ga clj_completions=(")
     (doseq [c completions]
-      (println (str "    " (quote-for-zsh c))))
-    (println "  )")))
+      (println (str "  " (quote-for-zsh c))))
+    (println ")")))
 
 (-main)
