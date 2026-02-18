@@ -1,0 +1,16 @@
+{:tasks
+ {print-funcs
+  {:doc "Print all public functions in a namespace"
+   :task (load-file "scripts/print-funcs.bb")}
+
+  print-funcs-all
+  {:doc "Print all public functions from all built-in namespaces"
+   :task (load-file "scripts/print-funcs-all.bb")}
+
+  generate-completions
+  {:doc "Generate completion list to completions.zsh"
+   :task (shell "bb scripts/generate-completions.bb > completions.zsh")}
+
+  test
+  {:doc "Run tests"
+   :task (shell "./tests/test-runner.zsh")}}}

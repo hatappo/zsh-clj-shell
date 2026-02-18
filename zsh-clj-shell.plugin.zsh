@@ -6,6 +6,9 @@
 # Lines that start with "(" are evaluated by Babashka,
 # and all other lines are handled as regular zsh commands.
 
+# Plugin directory
+ZSH_CLJ_SHELL_DIR="${0:A:h}"
+
 # Check that Babashka is available
 if ! command -v bb &> /dev/null; then
   echo "zsh-clj-shell: warning: 'bb' (Babashka) was not found" >&2
@@ -228,3 +231,25 @@ zsh-clj-shell-unload() {
   zle -D zsh-clj-shell-accept-line
   echo "zsh-clj-shell: unloaded"
 }
+
+# Completion for Clojure functions
+# Load completions from docs/completions.zsh
+_zsh_clj_shell_complete() {
+  source "${ZSH_CLJ_SHELL_DIR}/completions.zsh"
+  compadd -Q -a clj_completions
+}
+
+# Register completion widget
+zle -C zsh-clj-shell-complete complete-word _zsh_clj_shell_complete
+
+# Bind Tab to use our completion when inside parentheses
+zsh-clj-shell-tab() {
+  if [[ "$LBUFFER" == *"("* && "$RBUFFER" != *")"* ]] || \
+     [[ "$LBUFFER" =~ '\([^)]*$' ]]; then
+    zle zsh-clj-shell-complete
+  else
+    zle expand-or-complete
+  fi
+}
+zle -N zsh-clj-shell-tab
+bindkey '^I' zsh-clj-shell-tab

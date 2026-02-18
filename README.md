@@ -174,12 +174,44 @@ For pipelines with `|`, each stage that starts with `( ... )` is treated as a Cl
 
 ### Auto-loaded Libraries
 
-`clojure.string` is auto-loaded with `:refer :all`, so functions like `trim`, `upper-case`, `replace`, etc. can be used without namespace prefix.
+`clojure.string` is auto-loaded with `:refer :all`, so functions like `trim`, `upper-case`, `replace`, etc. can be used without namespace prefix. (Note: `:refer :all` is deprecated and will be removed in a future version. Use `str/` prefix instead.)
 
 Babashka startup is typically around ~20ms, so interactive lag is minimal.
 
+## Tab Completion
+
+Press `Tab` inside parentheses to get completion for Clojure functions.
+
+```clojure
+$ (map upper-c<Tab>
+$ (map upper-case    # completes to upper-case
+
+$ (fs/cre<Tab>
+$ (fs/create-        # shows create-dir, create-file, create-temp-dir, etc.
+```
+
+### Supported Namespaces
+
+Completions are available for all Babashka built-in namespaces:
+
+| Alias | Namespace |
+|-------|-----------|
+| `str/` | `clojure.string` |
+| `set/` | `clojure.set` |
+| `io/` | `clojure.java.io` |
+| `fs/` | `babashka.fs` |
+| `proc/` | `babashka.process` |
+| `http/` | `babashka.http-client` |
+| `json/` | `cheshire.core` |
+| `yaml/` | `clj-yaml.core` |
+| `async/` | `clojure.core.async` |
+| `csv/` | `clojure.data.csv` |
+| `xml/` | `clojure.data.xml` |
+| `transit/` | `cognitect.transit` |
+
+And many more including `clojure.core`, `clojure.walk`, `clojure.zip`, `hiccup.core`, `rewrite-clj.*`, `taoensso.timbre`, etc.
+
 ## Notes
 
-- Any input that starts with `(` is sent to Babashka.
-- If you need zsh subshell syntax `(command)`, use `{ command }` instead.
+- Any input that starts with `(` is sent to Babashka. If you need zsh subshell syntax `(command)`, use `{ command }` instead.
 - Ambiguous lines (for example, lines that contain `||`) are not transformed and are passed to zsh as-is.
