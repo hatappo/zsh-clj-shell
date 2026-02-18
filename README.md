@@ -211,6 +211,41 @@ Completions are available for all Babashka built-in namespaces:
 
 And many more including `clojure.core`, `clojure.walk`, `clojure.zip`, `hiccup.core`, `rewrite-clj.*`, `taoensso.timbre`, etc.
 
+## User Configuration
+
+Define your own functions in a config file:
+
+```
+~/.config/zsh-clj-shell/init.bb   (preferred)
+~/.config/zsh-clj-shell/init.clj  (fallback)
+```
+
+Example `init.bb`:
+
+```clojure
+(defn hello [name]
+  (str "Hello, " name "!"))
+
+(defn count-words [text]
+  (count (str/split text #"\s+")))
+```
+
+Usage:
+
+```clojure
+$ (hello "world")
+Hello, world!
+
+$ echo "one two three" | (count-words %%)
+3
+```
+
+To reload your config without restarting the shell:
+
+```
+zsh-clj-shell-reload-config
+```
+
 ## Notes
 
 - Any input that starts with `(` is sent to Babashka. If you need zsh subshell syntax `(command)`, use `{ command }` instead.
