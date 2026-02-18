@@ -295,6 +295,21 @@ typeset -g _zsh_clj_shell_completions_loaded
 _zsh_clj_shell_complete() {
   if [[ -z ${_zsh_clj_shell_completions_loaded-} ]]; then
     source "${ZSH_CLJ_SHELL_DIR}/completions.zsh"
+
+    # Add user-defined functions to completions
+    local config_file=""
+    if [[ -f "$ZSH_CLJ_SHELL_CONFIG_DIR/init.bb" ]]; then
+      config_file="$ZSH_CLJ_SHELL_CONFIG_DIR/init.bb"
+    elif [[ -f "$ZSH_CLJ_SHELL_CONFIG_DIR/init.clj" ]]; then
+      config_file="$ZSH_CLJ_SHELL_CONFIG_DIR/init.clj"
+    fi
+
+    if [[ -n "$config_file" ]]; then
+      local user_funcs
+      user_funcs=($(bb -e "(do (load-file \"$config_file\") (doseq [s (sort (map name (keys (ns-publics 'user))))] (println s)))" 2>/dev/null))
+      clj_completions+=($user_funcs)
+    fi
+
     _zsh_clj_shell_completions_loaded=1
   fi
   compadd -Q -a clj_completions
