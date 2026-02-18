@@ -16,6 +16,38 @@ if ! command -v bb &> /dev/null; then
   return 1
 fi
 
+# User config file (XDG Base Directory)
+ZSH_CLJ_SHELL_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh-clj-shell"
+
+zsh-clj-shell-load-user-config() {
+  local config_file=""
+  # init.bb takes priority, fallback to init.clj
+  if [[ -f "$ZSH_CLJ_SHELL_CONFIG_DIR/init.bb" ]]; then
+    config_file="$ZSH_CLJ_SHELL_CONFIG_DIR/init.bb"
+  elif [[ -f "$ZSH_CLJ_SHELL_CONFIG_DIR/init.clj" ]]; then
+    config_file="$ZSH_CLJ_SHELL_CONFIG_DIR/init.clj"
+  fi
+
+  if [[ -n "$config_file" && -r "$config_file" ]]; then
+    typeset -g ZSH_CLJ_SHELL_USER_CONFIG
+    ZSH_CLJ_SHELL_USER_CONFIG="$(cat "$config_file")"
+  else
+    unset ZSH_CLJ_SHELL_USER_CONFIG
+  fi
+}
+
+zsh-clj-shell-reload-config() {
+  zsh-clj-shell-load-user-config
+  if [[ -n "${ZSH_CLJ_SHELL_USER_CONFIG-}" ]]; then
+    echo "zsh-clj-shell: config reloaded"
+  else
+    echo "zsh-clj-shell: no config file found"
+  fi
+}
+
+# Load user config at startup
+zsh-clj-shell-load-user-config
+
 # Call the original accept-line if it was preserved
 zsh-clj-shell-call-original-accept-line() {
   zle zsh-clj-shell-orig-accept-line 2>/dev/null || zle .accept-line
@@ -47,15 +79,21 @@ zsh-clj-shell-build-bb-stage() {
   local expr="$1"
   local has_input="$2"
   local input_form='""'
+  local user_config=""
   local script
 
   if (( has_input )); then
     input_form='(slurp *in*)'
   fi
 
+  # Include user config if available
+  if [[ -n "${ZSH_CLJ_SHELL_USER_CONFIG-}" ]]; then
+    user_config="${ZSH_CLJ_SHELL_USER_CONFIG}"$'\n  '
+  fi
+
   script="(do
   (require '[clojure.string :as str :refer :all])
-  (let [raw ${input_form}
+  ${user_config}(let [raw ${input_form}
         %% raw
         % (if (empty? raw) [] (str/split-lines raw))
         result ${expr}]
@@ -244,6 +282,9 @@ zsh-clj-shell-unload() {
   unset _zsh_clj_shell_orig_tab_binding
   unset clj_completions
 
+  # Clear user config
+  unset ZSH_CLJ_SHELL_USER_CONFIG
+
   echo "zsh-clj-shell: unloaded"
 }
 
@@ -254,6 +295,21 @@ typeset -g _zsh_clj_shell_completions_loaded
 _zsh_clj_shell_complete() {
   if [[ -z ${_zsh_clj_shell_completions_loaded-} ]]; then
     source "${ZSH_CLJ_SHELL_DIR}/completions.zsh"
+
+    # Add user-defined functions to completions
+    local config_file=""
+    if [[ -f "$ZSH_CLJ_SHELL_CONFIG_DIR/init.bb" ]]; then
+      config_file="$ZSH_CLJ_SHELL_CONFIG_DIR/init.bb"
+    elif [[ -f "$ZSH_CLJ_SHELL_CONFIG_DIR/init.clj" ]]; then
+      config_file="$ZSH_CLJ_SHELL_CONFIG_DIR/init.clj"
+    fi
+
+    if [[ -n "$config_file" ]]; then
+      local user_funcs
+      user_funcs=($(bb -e "(do (load-file \"$config_file\") (doseq [s (sort (map name (keys (ns-publics 'user))))] (println s)))" 2>/dev/null))
+      clj_completions+=($user_funcs)
+    fi
+
     _zsh_clj_shell_completions_loaded=1
   fi
   compadd -Q -a clj_completions
