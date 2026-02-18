@@ -50,6 +50,13 @@ zsh-clj-shell-load-user-config
 
 # Call the original accept-line if it was preserved
 zsh-clj-shell-call-original-accept-line() {
+  # Prefer zsh-abbr's Enter widget when available so abbreviations expand even if
+  # another plugin temporarily replaced accept-line in the chain.
+  if zle -l abbr-expand-and-accept >/dev/null 2>&1; then
+    zle abbr-expand-and-accept
+    return $?
+  fi
+
   zle zsh-clj-shell-orig-accept-line 2>/dev/null || zle .accept-line
 }
 
@@ -59,6 +66,12 @@ zsh-clj-shell-install-widget() {
   current_widget="$(zle -lL accept-line 2>/dev/null)"
 
   if [[ "$current_widget" == *"zsh-clj-shell-accept-line"* ]]; then
+    return 0
+  fi
+
+  # Keep the first captured origin to preserve a stable widget chain.
+  if zle -l zsh-clj-shell-orig-accept-line >/dev/null 2>&1; then
+    zle -N accept-line zsh-clj-shell-accept-line
     return 0
   fi
 
@@ -263,7 +276,7 @@ zsh-clj-shell-unload() {
   autoload -Uz add-zsh-hook
   add-zsh-hook -d precmd zsh-clj-shell-install-widget
 
-  if zle -l | grep -qx 'zsh-clj-shell-orig-accept-line'; then
+  if zle -l zsh-clj-shell-orig-accept-line >/dev/null 2>&1; then
     zle -A zsh-clj-shell-orig-accept-line accept-line
     zle -D zsh-clj-shell-orig-accept-line
   else
