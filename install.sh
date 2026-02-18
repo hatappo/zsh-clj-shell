@@ -7,6 +7,7 @@ INSTALL_DIR="${HOME}/.zsh-clj-shell"
 ZSHRC="${HOME}/.zshrc"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_FILE="zsh-clj-shell.plugin.zsh"
+COMPLETIONS_FILE="completions.zsh"
 
 # Check Babashka
 if ! command -v bb &> /dev/null; then
@@ -20,9 +21,10 @@ echo "Babashka found: $(bb --version)"
 # Create install directory
 mkdir -p "$INSTALL_DIR"
 
-# Copy plugin file
+# Copy plugin files
 cp "$SCRIPT_DIR/$PLUGIN_FILE" "$INSTALL_DIR/"
-echo "Copied plugin to ${INSTALL_DIR}/"
+cp "$SCRIPT_DIR/$COMPLETIONS_FILE" "$INSTALL_DIR/"
+echo "Copied plugin files to ${INSTALL_DIR}/"
 
 # Ensure zsh-clj-shell source line exists at the end of .zshrc
 if [[ ! -f "$ZSHRC" ]]; then
