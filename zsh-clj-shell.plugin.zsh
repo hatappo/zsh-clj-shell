@@ -232,6 +232,9 @@ zsh-clj-shell-accept-line() {
 
     # Store the original expression/line in shell history
     print -s -- "$line"
+    # Sync history to ensure ↑ key navigation works immediately
+    fc -W
+    fc -R
 
     # Flush ZLE and execute transformed command
     zle -I
