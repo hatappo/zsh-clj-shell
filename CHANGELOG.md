@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [v0.1.3] - 2026-02-19
+
+### Fixed
+- Installer now skips `.zshrc` updates when a `zsh-clj-shell.plugin.zsh` source line already exists.
+- Expanded `.gitignore` with additional Zsh runtime artifacts and editor temporary files.
+
+### Docs
+- Added notes about widget interaction and plugin load order in `README.md`.
+- Added this changelog file for release tracking.
+
 ## [v0.1.2] - 2026-02-19
 
 ### Added
