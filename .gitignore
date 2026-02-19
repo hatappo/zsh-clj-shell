@@ -1,3 +1,16 @@
-
+# Tool caches
 .lsp/.cache
 .clj-kondo/.cache
+
+# Zsh runtime artifacts
+.zcompdump
+.zcompdump-*
+*.zwc
+
+# Editor temporary files
+*~
+*.swp
+*.swo
+
+# OS files
+.DS_Store
