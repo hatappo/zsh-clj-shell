@@ -59,93 +59,10 @@ hello, world
 ### Mixed with Shell Commands
 
 ```clojure
-$ ls -la
-drwxr-xr-x  5 user  staff  160 Feb 16 19:00 .
-...
-
-$ (+ 10 20) | cat
-30
-
-$ printf '  aaa  \n  bbb  ' | (map (comp upper-case trim) %) | cat -n
+$ echo '  aaa  \n  bbb  \nccc' | (map (comp upper-case trim) %) | cat -n
      1	AAA
      2	BBB
-```
-
-## Requirements
-
-- zsh 5.0+
-- [Babashka](https://github.com/babashka/babashka#installation)
-
-## Installation
-
-### Plugin Managers
-
-#### zinit
-
-```zsh
-zinit light hatappo/zsh-clj-shell
-```
-
-#### zplug
-
-```zsh
-zplug "hatappo/zsh-clj-shell"
-```
-
-#### antigen
-
-```zsh
-antigen bundle hatappo/zsh-clj-shell
-```
-
-#### sheldon
-
-Add to `~/.config/sheldon/plugins.toml`:
-
-```toml
-[plugins.zsh-clj-shell]
-github = "hatappo/zsh-clj-shell"
-```
-
-#### oh-my-zsh
-
-Clone the repository to oh-my-zsh custom plugins directory:
-
-```bash
-git clone https://github.com/hatappo/zsh-clj-shell.git \
-  ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-clj-shell
-```
-
-Then add `zsh-clj-shell` to your plugins in `~/.zshrc`:
-
-```zsh
-plugins=(... zsh-clj-shell)
-```
-
-### Automatic Installation
-
-```bash
-git clone https://github.com/hatappo/zsh-clj-shell.git
-cd zsh-clj-shell
-./install.sh
-```
-
-### Manual Installation
-
-Add the following to `~/.zshrc`:
-
-```zsh
-source /path/to/zsh-clj-shell/zsh-clj-shell.plugin.zsh
-```
-
-Place this near the end of `~/.zshrc` so later plugins do not replace `accept-line`.
-
-## Unload
-
-To disable `zsh-clj-shell` in the current session:
-
-```
-zsh-clj-shell-unload
+     3  CCC
 ```
 
 ## How It Works
@@ -211,7 +128,7 @@ Completions are available for all Babashka built-in namespaces:
 
 And many more including `clojure.core`, `clojure.walk`, `clojure.zip`, `hiccup.core`, `rewrite-clj.*`, `taoensso.timbre`, etc.
 
-## User Configuration
+## User Configuration / User Defined Functions
 
 Define your own functions in a config file:
 
@@ -244,6 +161,83 @@ To reload your config without restarting the shell:
 
 ```
 zsh-clj-shell-reload-config
+```
+
+## Requirements
+
+- zsh 5.0+
+- [Babashka](https://github.com/babashka/babashka#installation)
+
+## Installation
+
+### Plugin Managers
+
+#### [zinit](https://github.com/zdharma-continuum/zinit)
+
+```zsh
+zinit light hatappo/zsh-clj-shell
+```
+
+#### [zplug](https://github.com/zplug/zplug)
+
+```zsh
+zplug "hatappo/zsh-clj-shell"
+```
+
+#### [antigen](https://github.com/zsh-users/antigen)
+
+```zsh
+antigen bundle hatappo/zsh-clj-shell
+```
+
+#### [sheldon](https://github.com/rossmacarthur/sheldon)
+
+Add to `~/.config/sheldon/plugins.toml`:
+
+```toml
+[plugins.zsh-clj-shell]
+github = "hatappo/zsh-clj-shell"
+```
+
+#### [oh-my-zsh](https://github.com/ohmyzsh/ohmyzsh)
+
+Clone the repository to oh-my-zsh custom plugins directory:
+
+```bash
+git clone https://github.com/hatappo/zsh-clj-shell.git \
+  ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-clj-shell
+```
+
+Then add `zsh-clj-shell` to your plugins in `~/.zshrc`:
+
+```zsh
+plugins=(... zsh-clj-shell)
+```
+
+### Automatic Installation
+
+```bash
+git clone https://github.com/hatappo/zsh-clj-shell.git
+cd zsh-clj-shell
+./install.sh
+```
+
+### Manual Installation
+
+Add the following to `~/.zshrc`:
+
+```zsh
+source /path/to/zsh-clj-shell/zsh-clj-shell.plugin.zsh
+```
+
+Place this near the end of `~/.zshrc` so later plugins do not replace `accept-line`.
+
+## Unload
+
+To disable `zsh-clj-shell` in the current session:
+
+```
+zsh-clj-shell-unload
 ```
 
 ## Notes
