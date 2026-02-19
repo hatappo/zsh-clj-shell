@@ -31,20 +31,21 @@ if [[ ! -f "$ZSHRC" ]]; then
   touch "$ZSHRC"
 fi
 
-tmp_zshrc="$(mktemp)"
-awk '
-  $0 !~ /source.*zsh-clj-shell\.plugin\.zsh/ &&
-  $0 !~ /^# zsh-clj-shell/
-' "$ZSHRC" > "$tmp_zshrc"
-mv "$tmp_zshrc" "$ZSHRC"
+if grep -Eq '^[[:space:]]*source[[:space:]].*zsh-clj-shell\.plugin\.zsh([[:space:]]|$)' "$ZSHRC"; then
+  echo "Found existing zsh-clj-shell source line in .zshrc (no changes)"
+else
+  # Add one separator blank line only when .zshrc already has content.
+  if [[ -s "$ZSHRC" ]]; then
+    echo "" >> "$ZSHRC"
+  fi
 
-{
-  echo ""
-  echo "# zsh-clj-shell - Clojure (Babashka) shell integration"
-  echo "source ${INSTALL_DIR}/${PLUGIN_FILE}"
-} >> "$ZSHRC"
+  {
+    echo "# zsh-clj-shell - Clojure (Babashka) shell integration"
+    echo "source ${INSTALL_DIR}/${PLUGIN_FILE}"
+  } >> "$ZSHRC"
 
-echo "Updated .zshrc (source line moved to the end)"
+  echo "Updated .zshrc (source line added)"
+fi
 
 echo ""
 echo "zsh-clj-shell installation complete!"
