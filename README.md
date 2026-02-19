@@ -250,3 +250,10 @@ zsh-clj-shell-reload-config
 
 - Any input that starts with `(` is sent to Babashka. If you need zsh subshell syntax `(command)`, use `{ command }` instead.
 - Ambiguous lines (for example, lines that contain `||`) are not transformed and are passed to zsh as-is.
+- `zsh-clj-shell` hooks ZLE widgets (especially `accept-line` and `Tab`). Plugins that also override these widgets can interfere depending on load order.
+- Known interaction point: `zsh-abbr` (`accept-line` / space expansion). Current releases include a compatibility path, but if expansion stops working, reload your shell and verify widget bindings with `print -- "$widgets[accept-line]"`.
+- Recommended order: load abbreviation/autosuggestion plugins first, then load `zsh-clj-shell` near the end of `.zshrc`.
+
+## License
+
+MIT.
